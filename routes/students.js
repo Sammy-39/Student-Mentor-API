@@ -126,11 +126,20 @@ router.delete("/student/:id",(req,res)=>{
     try{
         studentsList = JSON.parse(fs.readFileSync(studentsFile,"utf8"))
         if(studentsList[req.params.id-1]){
+            let studId = studentsList[req.params.id-1].id
             studentsList.splice(req.params.id-1,1)
             res.send({
                 message: "Delete Success"
             })
             fs.writeFileSync(studentsFile,JSON.stringify(studentsList))
+
+            mentorsList.forEach(mentor=>{
+                let index = mentor.studsId.indexOf(studId)
+                if(index!==-1){
+                    mentor.studsId.splice(index,1)
+                }
+            })
+            fs.writeFileSync(mentorsFile,JSON.stringify(mentorsList))
         }
         else{
             throw new Error("Id not found")
