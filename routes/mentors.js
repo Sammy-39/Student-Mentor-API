@@ -10,6 +10,7 @@ const file = path.join(__dirname,"../static-data/mentors.json")
 let mentorsList = JSON.parse(fs.readFileSync(file,"utf8"))
 
 router.get("/mentors",(req,res)=>{
+    mentorsList = JSON.parse(fs.readFileSync(file,"utf8"))
     res.json(mentorsList)
 })
 
