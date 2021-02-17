@@ -4,7 +4,6 @@ const path = require("path")
 
 const router = express.Router()
 
-const port = process.env.PORT || 5000
 const studentsFile = path.join(__dirname,"../static-data/students.json")
 const mentorsFile = path.join(__dirname,"../static-data/mentors.json")
 
@@ -12,46 +11,72 @@ let studentsList = JSON.parse(fs.readFileSync(studentsFile,"utf8"))
 let mentorsList = JSON.parse(fs.readFileSync(mentorsFile,"utf8"))
 
 router.get("/students",(req,res)=>{
-    studentsList = JSON.parse(fs.readFileSync(studentsFile,"utf8"))
-    res.json(studentsList)
+    try{
+        studentsList = JSON.parse(fs.readFileSync(studentsFile,"utf8"))
+        res.json(studentsList)
+    }
+    catch(err){
+        res.send({
+            message : err.message
+        })
+    }
 })
 
 router.get('/student/:id',(req,res)=>{
-    studentsList = JSON.parse(fs.readFileSync(studentsFile,"utf8"))
-    if(studentsList[req.params.id-1]){
-        res.json(studentsList[req.params.id-1])
+    try{
+        studentsList = JSON.parse(fs.readFileSync(studentsFile,"utf8"))
+        if(studentsList[req.params.id-1]){
+            res.json(studentsList[req.params.id-1])
+        }
+        else{
+            throw new Error("Id not found")
+        }
     }
-    else{
+    catch(err){
         res.send({
-            message: "Error: ID not found"
+            message : err.message
         })
     }
 })
 
 router.post("/student",(req,res)=>{
-    studentsList = JSON.parse(fs.readFileSync(studentsFile,"utf8"))
-    studentsList.push({...req.body,...{"id":`stud-${studentsList.length+1}`}})
-    fs.writeFileSync(studentsFile,JSON.stringify(studentsList))
-    res.send({
-        message: "Added 1 entry"
-    })
-})
-
-router.put("/student/:id",(req,res)=>{
-    studentsList = JSON.parse(fs.readFileSync(studentsFile,"utf8"))
-    if(studentsList[req.params.id-1]){
-        studentsList[req.params.id-1] = {...req.body,...{"id":`stud-${req.params.id}`}}
-        res.send({
-            message: "Update Success"
-        })
-    }
-    else{
+    try{
+        studentsList = JSON.parse(fs.readFileSync(studentsFile,"utf8"))
         studentsList.push({...req.body,...{"id":`stud-${studentsList.length+1}`}})
+        fs.writeFileSync(studentsFile,JSON.stringify(studentsList))
         res.send({
             message: "Added 1 entry"
         })
     }
-    fs.writeFileSync(studentsFile,JSON.stringify(studentsList))
+    catch(err){
+        res.send({
+            message: err.message
+        })
+    }
+})
+
+router.put("/student/:id",(req,res)=>{
+    try{
+        studentsList = JSON.parse(fs.readFileSync(studentsFile,"utf8"))
+        if(studentsList[req.params.id-1]){
+            studentsList[req.params.id-1] = {...req.body,...{"id":`stud-${req.params.id}`}}
+            res.send({
+                message: "Update Success"
+            })
+        }
+        else{
+            studentsList.push({...req.body,...{"id":`stud-${studentsList.length+1}`}})
+            res.send({
+                message: "Added 1 entry"
+            })
+        }
+        fs.writeFileSync(studentsFile,JSON.stringify(studentsList))
+    }
+    catch(err){
+        res.send({
+            message: err.message
+        })
+    }
 })
 
 router.patch("/student/:id",(req,res)=>{
@@ -98,17 +123,22 @@ router.patch("/student/:id",(req,res)=>{
 })
 
 router.delete("/student/:id",(req,res)=>{
-    studentsList = JSON.parse(fs.readFileSync(studentsFile,"utf8"))
-    if(studentsList[req.params.id-1]){
-        studentsList.splice(req.params.id-1,1)
-        res.send({
-            message: "Delete Success"
-        })
-        fs.writeFileSync(studentsFile,JSON.stringify(studentsList))
+    try{
+        studentsList = JSON.parse(fs.readFileSync(studentsFile,"utf8"))
+        if(studentsList[req.params.id-1]){
+            studentsList.splice(req.params.id-1,1)
+            res.send({
+                message: "Delete Success"
+            })
+            fs.writeFileSync(studentsFile,JSON.stringify(studentsList))
+        }
+        else{
+            throw new Error("Id not found")
+        }
     }
-    else{
+    catch(err){
         res.send({
-            message: "Error: ID not found"
+            message: err.message
         })
     }
 })
