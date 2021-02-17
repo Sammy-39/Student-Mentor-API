@@ -15,6 +15,7 @@ router.get("/mentors",(req,res)=>{
 })
 
 router.get('/mentor/:id',(req,res)=>{
+    mentorsList = JSON.parse(fs.readFileSync(file,"utf8"))
     if(mentorsList[req.params.id-1]){
         res.json(mentorsList[req.params.id-1])
     }
@@ -26,6 +27,7 @@ router.get('/mentor/:id',(req,res)=>{
 })
 
 router.post("/mentor",(req,res)=>{
+    mentorsList = JSON.parse(fs.readFileSync(file,"utf8"))
     mentorsList.push({...req.body,...{"id":`ment-${mentorsList.length+1}`}})
     fs.writeFileSync(file,JSON.stringify(mentorsList))
     res.send({
@@ -34,6 +36,7 @@ router.post("/mentor",(req,res)=>{
 })
 
 router.put("/mentor/:id",(req,res)=>{
+    mentorsList = JSON.parse(fs.readFileSync(file,"utf8"))
     if(mentorsList[req.params.id-1]){
         mentorsList[req.params.id-1] = {...req.body,...{"id":`ment-${req.params.id}`}}
         res.send({
@@ -50,6 +53,7 @@ router.put("/mentor/:id",(req,res)=>{
 })
 
 router.patch("/mentor/:id",(req,res)=>{
+    mentorsList = JSON.parse(fs.readFileSync(file,"utf8"))
     if(mentorsList[req.params.id-1]){
         if(!mentorsList[req.params.id-1].studsId){
             mentorsList[req.params.id-1] = {...mentorsList[req.params.id-1],...{"studsId":[]}}
@@ -71,6 +75,7 @@ router.patch("/mentor/:id",(req,res)=>{
 })
 
 router.delete("/mentor/:id",(req,res)=>{
+    mentorsList = JSON.parse(fs.readFileSync(file,"utf8"))
     if(mentorsList[req.params.id-1]){
         mentorsList.splice(req.params.id-1,1)
         res.send({
