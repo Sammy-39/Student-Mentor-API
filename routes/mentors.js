@@ -5,13 +5,15 @@ const path = require("path")
 
 const router = express.Router()
 
-const file = path.join(__dirname,"../static-data/mentors.json")
+const mentorsFile = path.join(__dirname,"../static-data/mentors.json")
+const studentsFile = path.join(__dirname,"../static-data/students.json")
 
-let mentorsList = JSON.parse(fs.readFileSync(file,"utf8"))
+let studentsList = JSON.parse(fs.readFileSync(studentsFile,"utf8"))
+let mentorsList = JSON.parse(fs.readFileSync(mentorsFile,"utf8"))
 
 router.get("/mentors",(req,res)=>{
     try{
-        mentorsList = JSON.parse(fs.readFileSync(file,"utf8"))
+        mentorsList = JSON.parse(fs.readFileSync(mentorsFile,"utf8"))
         res.json(mentorsList)
     }
     catch(err){
@@ -23,7 +25,7 @@ router.get("/mentors",(req,res)=>{
 
 router.get('/mentor/:id',(req,res)=>{
     try{
-        mentorsList = JSON.parse(fs.readFileSync(file,"utf8"))
+        mentorsList = JSON.parse(fs.readFileSync(mentorsFile,"utf8"))
         if(mentorsList[req.params.id-1]){
             res.json(mentorsList[req.params.id-1])
         }
@@ -40,9 +42,9 @@ router.get('/mentor/:id',(req,res)=>{
 
 router.post("/mentor",(req,res)=>{
     try{
-        mentorsList = JSON.parse(fs.readFileSync(file,"utf8"))
+        mentorsList = JSON.parse(fs.readFileSync(mentorsFile,"utf8"))
         mentorsList.push({...req.body,...{"id":`ment-${mentorsList.length+1}`}})
-        fs.writeFileSync(file,JSON.stringify(mentorsList))
+        fs.writeFileSync(mentorsFile,JSON.stringify(mentorsList))
         res.send({
             message: "Added 1 entry"
         })
@@ -56,7 +58,7 @@ router.post("/mentor",(req,res)=>{
 
 router.put("/mentor/:id",(req,res)=>{
     try{
-        mentorsList = JSON.parse(fs.readFileSync(file,"utf8"))
+        mentorsList = JSON.parse(fs.readFileSync(mentorsFile,"utf8"))
         if(mentorsList[req.params.id-1]){
             mentorsList[req.params.id-1] = {...req.body,...{"id":`ment-${req.params.id}`}}
             res.send({
@@ -69,7 +71,7 @@ router.put("/mentor/:id",(req,res)=>{
                 message: "Added 1 entry"
             })
         }
-        fs.writeFileSync(file,JSON.stringify(mentorsList))
+        fs.writeFileSync(mentorsFile,JSON.stringify(mentorsList))
     }
     catch(err){
         res.send({
@@ -80,7 +82,9 @@ router.put("/mentor/:id",(req,res)=>{
 
 router.patch("/mentor/:id",(req,res)=>{
     try{
-        mentorsList = JSON.parse(fs.readFileSync(file,"utf8"))
+        mentorsList = JSON.parse(fs.readFileSync(mentorsFile,"utf8"))
+        studentsList = JSON.parse(fs.readFileSync(studentsFile,"utf8"))
+        
         if(mentorsList[req.params.id-1]){
             if(!mentorsList[req.params.id-1].studsId){
                 mentorsList[req.params.id-1] = {...mentorsList[req.params.id-1],...{"studsId":[]}}
@@ -88,11 +92,15 @@ router.patch("/mentor/:id",(req,res)=>{
             req.body.studsId.forEach((studId,idx)=>{
                 if(mentorsList[req.params.id-1].studsId.indexOf(studId)===-1)
                     mentorsList[req.params.id-1].studsId.push(studId)
+                studentsList.forEach((stud)=>{
+                    if(stud.id===studId){ stud.mentorId = "ment-"+req.params.id }
+                })
             }) 
             res.send({
                 message: "Patch Success"
             })
-            fs.writeFileSync(file,JSON.stringify(mentorsList))
+            fs.writeFileSync(mentorsFile,JSON.stringify(mentorsList))
+            fs.writeFileSync(studentsFile,JSON.stringify(studentsList))
         }
         else{
             throw new Error("Id not found")
@@ -107,13 +115,13 @@ router.patch("/mentor/:id",(req,res)=>{
 
 router.delete("/mentor/:id",(req,res)=>{
     try{
-        mentorsList = JSON.parse(fs.readFileSync(file,"utf8"))
+        mentorsList = JSON.parse(fs.readFileSync(mentorsFile,"utf8"))
         if(mentorsList[req.params.id-1]){
             mentorsList.splice(req.params.id-1,1)
             res.send({
                 message: "Delete Success"
             })
-            fs.writeFileSync(file,JSON.stringify(mentorsList))
+            fs.writeFileSync(mentorsFile,JSON.stringify(mentorsList))
         }
         else{
             throw new Error("Id not found")
